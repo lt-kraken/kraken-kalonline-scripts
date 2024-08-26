@@ -22,7 +22,7 @@ The primary motivation behind this project was to test the limits of conversatio
 
 ## Reflections
 
-The development journey was surprisingly smooth, considering the complexity of the tasks automated. ChatGPT's role was pivotal, offering not only code snippets but also debugging help and conceptual explanations. However, it was observed that occasional tweaks were necessary, especially in handling missing imports and optimizing some logic sequences.
+The development journey was surprisingly smooth, considering the complexity of the tasks automated. ChatGPT's role was pivotal, offering not only code snippets but also debugging help and conceptual explanations. However, it was observed that occasional tweaks were necessary, especially in handling missing imports and optimizing some logic sequences. One thing that ChatGPT struggled with was providing a solution to click simulation, which was easily resolved after a 5-minute investigation and finding `pywinauto`. Checking my conversation with ChatGPT, I've come to the conclusion that although it did suggest using `pywinauto` at an earlier time, it was suggested the wrong methods to perform the click operations. In all situations it seemed to suggest the `click_input` operations (simulate physical click) rather than the `click` operations (simulate a virtual click). 
 
 ## Contributions
 
