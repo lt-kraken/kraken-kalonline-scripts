@@ -1,4 +1,3 @@
-# kraken-kalonline-scripts
 # KalOnline Automation Tools
 
 This repository contains two sets of automation tools for KalOnline: one for item fusion (`AutoFuser`) and one for item enhancement (`AutoPimper`). Each tool is designed to automate specific tasks within the game, leveraging advanced scripting and automation techniques.
