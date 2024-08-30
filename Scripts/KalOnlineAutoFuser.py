@@ -37,7 +37,7 @@ init(autoreset=True)
 
 
 class GameWindowHandler:
-    def __init__(self, show_handles=False, handle=None, attempts=None, satisfaction=1, verbose=False,
+    def __init__(self, show_handles=False, handle=None, attempts=None, satisfaction=1, play_sound=False, verbose=False,
                  coordinate_debug=False):
         # Globals
         self.kalonline_utils = KalOnlineUtils(handle, verbose)
@@ -73,6 +73,7 @@ class GameWindowHandler:
         self.window_handle = handle
         self.attempts = attempts
         self.satisfaction = satisfaction
+        self.play_sound = play_sound
 
         # Debug
         self.verbose = verbose
@@ -104,6 +105,8 @@ class GameWindowHandler:
 
                     if self.is_satisfactory_fuse(detected_fuse, satisfaction_score):
                         logging.info(f"Pimping succeeded with {detected_fuse} (Satisfaction: {satisfaction_score}).")
+                        if self.play_sound:
+                            self.kalonline_utils.play_sound()
                         return
                     elif detected_fuse is None:
                         logging.error("Pimping failed, color detection error. Stopping...")
@@ -111,6 +114,9 @@ class GameWindowHandler:
                     self.rerun_count += 1
 
                 logging.warning("Maximum reruns reached.")
+                if self.play_sound:
+                    self.kalonline_utils.play_sound()
+
                 if not should_retry():
                     logging.info("Stopping the sequence as per user request.")
                     return
@@ -170,7 +176,7 @@ class GameWindowHandler:
                 if pixel_color in self.fuse_colors:
                     fuse_name = self.fuse_colors[pixel_color]
 
-                    logging.info(f"Detected fuse: {fuse_name} at ({x + region[0]}, {y + region[1]})")
+                    logging.debug(f"Detected fuse: {fuse_name} at ({x + region[0]}, {y + region[1]})")
                     return fuse_name
 
         logging.error("No matching color found in the specified region.")
@@ -221,6 +227,8 @@ if __name__ == "__main__":
     parser.add_argument("--handle", type=int, help="Window handle ID to use for the game window.")
     parser.add_argument("--satisfaction", type=int, help="Minimum satisfaction score for the fuse (1-8).")
     parser.add_argument("--attempts", type=int, help="Maximum number of attempts.")
+    parser.add_argument("--play_sound", action="store_true", help="Plays a sound (ding.mp3) upon satisfactory fuse "
+                                                                  "detection")
 
     # Debug
     parser.add_argument("--verbose", action="store_true",
@@ -231,9 +239,12 @@ if __name__ == "__main__":
 
     handler = GameWindowHandler(
         show_handles=args.show_handles,
+
         handle=args.handle,
         attempts=args.attempts,
         satisfaction=args.satisfaction,
+        play_sound=args.play_sound,
+
         verbose=args.verbose,
         coordinate_debug=args.coordinate_debug
     )
