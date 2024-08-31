@@ -41,7 +41,6 @@ class GameWindowHandler:
                  coordinate_debug=False):
         # Globals
         self.kalonline_utils = KalOnlineUtils(handle, verbose)
-        self.app = None
         self.rerun_count = 0
 
         self.fuse_colors = {
@@ -217,7 +216,7 @@ class GameWindowHandler:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Pimping sequence automation script.")
+    parser = argparse.ArgumentParser(description="Dragon Fusing sequence automation script.")
 
     # Initial Load
     parser.add_argument("--show_handles", action="store_true",

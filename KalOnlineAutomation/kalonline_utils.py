@@ -38,7 +38,14 @@ class KalOnlineUtils:
         except Exception as e:
             logging.error(f"Failed to rename windows: {e}")
 
-    def click_at_position(self, x, y):
+    def to_relative(self, absolute_coords):
+        """ Convert absolute screen coordinates to coordinates relative to the window. """
+        window_rect = self.get_window_rect()
+        return (absolute_coords[0] - window_rect[0], absolute_coords[1] - window_rect[1])
+
+    def click_at_position(self, coords):
+        x, y = coords
+
         try:
             if not self.app:
                 raise ValueError("Application is not connected. Cannot click.")
@@ -48,6 +55,19 @@ class KalOnlineUtils:
                 logging.debug(f"Clicked at ({x}, {y}) within the game window.")
         except Exception as e:
             logging.error(f"Failed to click at position ({x}, {y}): {e}")
+
+    def right_click_at_position(self, coords):
+        x, y = coords
+
+        try:
+            if not self.app:
+                raise ValueError("Application is not connected. Cannot right-click.")
+
+            self.app.window(handle=self.window_handle).right_click(coords=(x, y))
+            if self.verbose:
+                logging.debug(f"Right-clicked at ({x}, {y}) within the game window.")
+        except Exception as e:
+            logging.error(f"Failed to right-click at position ({x}, {y}): {e}")
 
     @staticmethod
     def show_debug_overlay(screenshot, relative_region):

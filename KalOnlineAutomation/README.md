@@ -1,9 +1,18 @@
-# KalOnline Auto Pimper
+# KalOnline Automation Scripts
 
-KalOnline Auto Pimper is a Python script designed to automate the process of "pimping" in the game KalOnline. The script automates clicks, color detection, and other in-game interactions, allowing you to efficiently manage the pimping process without manual input.
+This repository contains Python scripts designed to automate various processes in the game KalOnline, including "dragon fusing" and "pimping". These scripts automate clicks, color detection, and other in-game interactions, allowing you to efficiently manage the process without manual input.
 
 ## Features
 
+### KalOnline Auto Fuser
+- Automates the clicking process for dragon fusing.
+- Detects specific colors to determine the success or failure of fusing.
+- Supports multi-monitor setups.
+- Allows customization of satisfaction levels and maximum reruns.
+- Optional debug mode for coordinate checking and visual overlays.
+- Works with the game window in the background (not minimized), so you can continue using your mouse freely.
+
+### KalOnline Auto Pimper
 - **Automated Pimping**: Automatically pimps items based on set criteria.
 - **Dynamic Coordinate Capture**: Captures coordinates for actions based on user input to adapt to different game layouts.
 - **Repair Functionality**: Automatically repairs items if pimping fails a set number of times.
@@ -17,40 +26,68 @@ KalOnline Auto Pimper is a Python script designed to automate the process of "pi
 - `colorama`
 - `mss`
 - `pygetwindow`
+- `pygame`
 
 ## Installation
 
 1. Clone the repository:
-   ```bash
-   git clone https://github.com/lt-kraken/kraken-kalonline-scripts.git
-   cd KalOnlineAutoPimper
-   ```
+    ```bash
+    git clone https://github.com/lt-kraken/kraken-kalonline-scripts.git
+    cd KalOnlineAutomation
+    ```
 
 2. Install the required Python packages:
    ```bash
    pip install -r requirements.txt
    ```
-
-## Usage
-You can run the script using the command line. Below are some example usages:
-
-### Prompt Usage (1st use)
+   
+# Basic Usage
+## KalOnline Auto Fuser
+```bash
+KalOnlineAutoFuser.py [-h] [--show_handles] [--handle HANDLE]
+                             [--satisfaction SATISFACTION]
+                             [--attempts ATTEMPTS] [--play_sound] [--verbose]
+                             [--coordinate_debug]
+```
+1. Ensure the game is running and the window is visible.
+2. Run the script
    ```bash
-   python KalOnlineAutoPimper.py
+   python KalOnlineAutoFuser.py --show_handles # Adds window handles IDs to all `TheHyperNetwork` windows.
+   python KalOnlineAutoFuser.py # Starts the application in prompt mode
+   python KalOnlineAutoFuser.py --handle <window_handle> --satisfaction <satisfaction> --attempts <attempts> # Starts the application in direct mode
    ```
-- Follow the command prompts for more guidance
-   - Screen renames are automatically performed to include window handles
 
-### Basic Usage
+### Arguments
+- `--handle`: Window handle ID to use for the game window.
+- `--satisfaction`: Minimum satisfaction score for the fuse (1-8).
+- `--attempts`: Maximum number of attempts.
+- `--help` | `-h`: Display manual
+
+## KalOnline Auto Pimper
+```bash
+KalOnlineAutoPimper.py [-h] [--show_handles] [--handle HANDLE] [--runs RUNS]
+                              [--attempts-before-repair ATTEMPTS_BEFORE_REPAIR]
+                              [--repair] [--repair-only]
+                              [--auto-sell-type {0,1,2}] [--kings]
+```
+
+1. Ensure the game is running and the window is visible.
+2. Run the script
    ```bash
-   python KalOnlineAutoPimper.py --handle <window_handle> [--runs <number_of_runs>] [--repair] [--repair-only] [--auto-sell-type <0, 1, 2>] [--kings]
+   python KalOnlineAutoPimper.py --show_handles # Adds window handles IDs to all `TheHyperNetwork` windows.
+   python KalOnlineAutoPimper.py # Starts the application in prompt mode
    ```
+### Specific scenarios
+For more in depth scenario's, please consult the wiki.
+
+### Arguments
 - `--handle`: Window handle ID to use for the game window.
 - `--runs`: Number of runs to perform (default is 1).
 - `--repair`: Enable repair functionality.
 - `--repair`-only: Only perform repair actions, no pimping.
-- `--auto`-sell-type: Defines the auto-sell behavior; 0 = do not sell, 1 = sell after success, 2 = sell if failed after all retries.
-- `--kings`: Check for 'Kings' upgrade and confirm before stopping.
+- `--auto-sell-type`: Defines the auto-sell behavior; 0 = do not sell (default), 1 = sell after success, 2 = sell even if failed after retries.
+- `--kings`: Check for 'The Kings' upgrade and confirm before stopping (also works for Prideful, Despotic, etc.)
+- `--help` | `-h`: Display manual
 
 ## Important Notes
 ### Dependency on Color Matching
