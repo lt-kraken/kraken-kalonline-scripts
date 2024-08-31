@@ -106,7 +106,7 @@ class GameWindowHandler:
                         logging.info(f"Pimping succeeded with {detected_fuse} (Satisfaction: {satisfaction_score}).")
                         if self.play_sound:
                             self.kalonline_utils.play_sound()
-                        return
+                        break
                     elif detected_fuse is None:
                         logging.error("Pimping failed, color detection error. Stopping...")
                         return
