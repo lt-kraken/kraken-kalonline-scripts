@@ -50,7 +50,7 @@ init(autoreset=True)
 
 class GameAutomationHandler:
     def __init__(self, show_handles=False, handle=None, repair_only=False, auto_sell_type=None, repair_enabled=True,
-                 check_kings=False, attempts_before_repair=1, runs=None, verbose=False):
+                 check_kings=False, attempts_before_repair=1, runs=None, verbose=False, coordinate_debug=False):
         # Globals
         self.kalonline_utils = KalOnlineUtils(handle, verbose)
         self.app = None
@@ -69,6 +69,7 @@ class GameAutomationHandler:
 
         # Debug
         self.verbose = verbose
+        self.coordinate_debug = coordinate_debug
 
         # Settings
         self.game_resolution = (1024, 768)
@@ -207,7 +208,7 @@ class GameAutomationHandler:
     def handle_attempts_and_repair(self, attempts):
         if attempts >= self.attempts_before_repair:
             if self.repair_enabled:
-                logging.info(f"Repairing the weapon after {attempts} attempts...")
+                logging.info(f"Repairing the weapon (x{attempts*5}) after {attempts} attempts...")
                 self.drag_item(self.coordinates['repair_item'], self.coordinates['weapon_item'], attempts * 5)
             if self.auto_sell_type == 2:
                 logging.info("Maximum pimp attempts for item reached, selling to store unpimped.")
@@ -331,6 +332,7 @@ if __name__ == "__main__":
     # Debug
     parser.add_argument("--verbose", action="store_true",
                         help="Run the script in verbose mode with more detailed output.")
+    parser.add_argument("--coordinate_debug", action="store_true", help="Show debug overlays for coordinate detection.")
 
     args = parser.parse_args()
 
@@ -351,7 +353,8 @@ if __name__ == "__main__":
         attempts_before_repair=args.attempts_before_repair,
         runs=args.runs,
 
-        verbose=args.verbose
+        verbose=args.verbose,
+        coordinate_debug=args.coordinate_debug
     )
     handler.start()
 
