@@ -50,7 +50,8 @@ init(autoreset=True)
 
 class GameAutomationHandler:
     def __init__(self, show_handles=False, handle=None, repair_only=False, auto_sell_type=None, repair_enabled=True,
-                 check_kings=False, attempts_before_repair=1, runs=None, verbose=False, coordinate_debug=False):
+                 check_kings=False, attempts_before_action=1, max_talisman_runs=None, bead_of_fire=None,
+                 items_to_pimp=None, verbose=False, coordinate_debug=False):
         # Globals
         self.kalonline_utils = KalOnlineUtils(handle, verbose)
         self.app = None
@@ -64,8 +65,10 @@ class GameAutomationHandler:
         self.auto_sell_type = auto_sell_type
         self.repair_enabled = repair_enabled
         self.check_kings = check_kings
-        self.attempts_before_repair = attempts_before_repair
-        self.runs = runs
+        self.attempts_before_action = attempts_before_action
+        self.max_talisman_runs = max_talisman_runs
+        self.items_to_pimp = items_to_pimp
+        self.bead_of_fire = bead_of_fire
 
         # Debug
         self.verbose = verbose
@@ -98,14 +101,15 @@ class GameAutomationHandler:
             self.last_position = mouse.Controller().position
             return False  # Stop listener
 
-    def drag_item(self, start_pos, end_pos, count=1):
-        for _ in range(count):
-            self.kalonline_utils.app.window(handle=self.window_handle).drag_mouse(
-                press_coords=start_pos,
-                release_coords=end_pos,
-                button="left"
-            )
-            self.kalonline_utils.click_at_position((446, 430))
+    def repair_item_times(self, times):
+        logging.debug(f"Repairing item {times} times...")
+        for _ in range(times):
+            self.repair_item()
+
+    def repair_item(self):
+        logging.debug(f"Repairing item...")
+        self.kalonline_utils.drag_item(self.coordinates['repair_item'], self.coordinates['weapon_item'])
+        self.kalonline_utils.click_at_position((446, 430))
 
     def check_color_presence(self, region):
         window_rect = self.kalonline_utils.get_window_rect()
@@ -172,44 +176,65 @@ class GameAutomationHandler:
                 self.perform_repair_only()
                 return
 
-            for run in range(self.runs):
-                self.handle_run(run)
-                if self.auto_sell_type == 0:
+            talisman_runs = 0
+            items_pimped = 0
+            for run in range(self.items_to_pimp):
+                talisman_runs += self.handle_run(run, talisman_runs)
+
+                if talisman_runs >= self.max_talisman_runs:
+                    logging.warning(
+                        f"Maximum talisman attempts ({self.max_talisman_runs}) reached. Stopping further pimping.")
+                    items_pimped = run
                     break
+
+            logging.info(
+                f"Pimping sequence completed. Items attempted: {items_pimped + 1}/{self.items_to_pimp}, Talisman runs used: "
+                f"{talisman_runs}/{self.max_talisman_runs}")
 
         except Exception as e:
             logging.error(f"Error during pimping sequence: {e}")
 
     def perform_repair_only(self):
-        logging.warning("Only repairing the weapon...")
-        self.drag_item((760, 487), (832, 487), self.runs)
+        logging.warning("Repairing the item 30 times...")
+        # TODO: Should probably be input again
+        # (760, 487), (832, 487)
+        self.repair_item_times(30)
 
-    def handle_run(self, run):
-        attempts = 0
+    def handle_run(self, run, current_talisman_runs):
+        total_attempts_performed = 0
+        attempts_till_action = 0
         success = False
         second_attempt = False
 
-        while not success:
-            attempts = self.handle_attempts_and_repair(attempts)
-            self.drag_item(self.coordinates['talisman_item'], self.coordinates['weapon_item'])
+        while not success and current_talisman_runs + total_attempts_performed < self.max_talisman_runs:
+            total_attempts_performed += 1
+
+            attempts_till_action = self.handle_attempts_and_repair(attempts_till_action)
+            self.kalonline_utils.drag_item(self.coordinates['talisman_item'], self.coordinates['weapon_item'])
             time.sleep(6)
 
             result = self.check_color_presence((360, 210, 705, 265))
             success, second_attempt = self.handle_pimping_result(result, second_attempt)
 
-            if not success:
-                attempts += 1
+            logging.debug(f"Result: {result}, success: {success}, second_attempt: {second_attempt}")
 
             if success:
                 self.perform_auto_sell()
+                logging.info(f"Item {run + 1}/{self.items_to_pimp} successfully pimped after {total_attempts_performed} attempts.")
+                break
 
-        logging.info(f"Run {run + 1}/{self.runs} complete.")
+            attempts_till_action += 1
+
+        if not success:
+            logging.info(f"Item {run + 1}/{self.items_to_pimp} failed to pimp within allowed attempts.")
+
+        return total_attempts_performed
 
     def handle_attempts_and_repair(self, attempts):
-        if attempts >= self.attempts_before_repair:
+        if attempts >= self.attempts_before_action:
             if self.repair_enabled:
                 logging.info(f"Repairing the weapon (x{attempts*5}) after {attempts} attempts...")
-                self.drag_item(self.coordinates['repair_item'], self.coordinates['weapon_item'], attempts * 5)
+                self.repair_item_times(attempts * 5)
             if self.auto_sell_type == 2:
                 logging.info("Maximum pimp attempts for item reached, selling to store unpimped.")
                 self.perform_auto_sell()
@@ -220,6 +245,9 @@ class GameAutomationHandler:
         if result == "success":
             logging.info("Pimping succeeded.")
             return self.handle_kings_upgrade(second_attempt)
+        elif result is None and self.bead_of_fire:
+            logging.info("Bead Of Fire pimping likely succeeded.")
+            return True
         else:
             logging.warning("Pimping failed.")
             return False, second_attempt
@@ -245,17 +273,9 @@ class GameAutomationHandler:
             self.kalonline_utils.right_click_at_position(self.coordinates['weapon_item'])
             self.kalonline_utils.click_at_position((466, 417))
 
-    def ask_for_runs(self):
-        if not self.runs:
-            self.runs = self.kalonline_utils.ask_for_input(
-                prompt_message="Please enter the maximum number of runs: ",
-                validation_func=lambda x: x > 0,
-                error_message="Invalid input. Please enter a valid integer."
-            )
-
     def ask_for_attempts_before_repair(self):
-        if not self.attempts_before_repair:
-            self.attempts_before_repair = self.kalonline_utils.ask_for_input(
+        if not self.attempts_before_action:
+            self.attempts_before_action = self.kalonline_utils.ask_for_input(
                 prompt_message="Please enter the number of pimp attempts before we should repair (warning: each "
                                "failed attempt decreased durability by 5, make sure your weapon is repaired "
                                "beforehand and attempts do not exceed item maximum-5 durability: ",
@@ -272,9 +292,28 @@ class GameAutomationHandler:
                 error_message="Invalid input. Please enter a value between 0 and 2."
             )
 
+    def ask_for_max_talisman_runs(self):
+        if not self.max_talisman_runs:
+            self.max_talisman_runs = self.kalonline_utils.ask_for_input(
+                prompt_message="Please enter the maximum number of runs based on available talismans: ",
+                validation_func=lambda x: x > 0,
+                error_message="Invalid input. Please enter a valid integer."
+            )
+
+    def ask_for_items_to_pimp(self):
+        if not self.items_to_pimp:
+            self.items_to_pimp = self.kalonline_utils.ask_for_input(
+                prompt_message="Please enter the number of items to be pimped: ",
+                validation_func=lambda x: x > 0,
+                error_message="Invalid input. Please enter a valid integer."
+            )
+
     def ask_for_coordinates(self):
         self.ask_for_repair_item_coordinate()
-        self.ask_for_talisman_coordinate()
+
+        if not self.repair_only:
+            self.ask_for_talisman_coordinate()
+
         self.ask_for_item_coordinate()
         logging.info(f"coordinates recorded successfully")
         logging.info(f"starting in 3 seconds..")
@@ -303,11 +342,17 @@ class GameAutomationHandler:
             self.kalonline_utils.rename_windows()
             return
 
-        # Ask for input
         self.kalonline_utils.ask_for_handle()
-        self.ask_for_runs()
-        self.ask_for_attempts_before_repair()
-        self.ask_for_auto_sell_type()
+
+        # Ask for input
+        if not self.repair_only:
+            self.ask_for_items_to_pimp()
+            self.ask_for_max_talisman_runs()
+            self.ask_for_attempts_before_repair()
+            self.ask_for_auto_sell_type()
+        else:
+            self.items_to_pimp = 1
+
         self.ask_for_coordinates()
 
         self.perform_drag_sequence()
@@ -322,12 +367,17 @@ if __name__ == "__main__":
 
     # Functional workings
     parser.add_argument("--handle", type=int, help="Window handle ID to use for the game window.")
-    parser.add_argument("--runs", type=int, help="Number of runs to perform.")
-    parser.add_argument("--attempts_before_repair", type=int, help="Number of runs to perform.")
+    parser.add_argument("--max_talisman_runs", type=int, help="Number of runs to perform.")
+    parser.add_argument("--items_to_pimp", type=int, help="Number of runs to perform.")
+    parser.add_argument("--attempts_before_action", type=int, help="Amount of attempts to pimp an item before action "
+                                                                   "will be taken. Action depending on extra "
+                                                                   "arguments, repairing if --repair is passed or "
+                                                                   "selling if --auto-sell-type 2 is passed.")
     parser.add_argument("--repair", action="store_true", help="Enable repair functionality.")
     parser.add_argument("--repair-only", action="store_true", help="Only perform repair actions.")
     parser.add_argument("--auto_sell_type", type=int, choices=[0, 1, 2], help="Auto-sell type.")
     parser.add_argument("--kings", action="store_true", help="Check for 'Kings' upgrade and confirm before stopping.")
+    parser.add_argument("--bead_of_fire", action="store_true", help="Indicates whether BoF detection should be used.")
 
     # Debug
     parser.add_argument("--verbose", action="store_true",
@@ -342,6 +392,9 @@ if __name__ == "__main__":
     if args.repair_only and args.kings:
         raise ValueError("Cannot set both --repair-only and --kings options at the same time.")
 
+    if args.bead_of_fire:
+        raise ValueError("BEAD_OF_FIRE IS NOT YET SUPPORTED")
+
     handler = GameAutomationHandler(
         show_handles=args.show_handles,
 
@@ -350,8 +403,10 @@ if __name__ == "__main__":
         repair_enabled=args.repair,
         auto_sell_type=args.auto_sell_type,
         check_kings=args.kings,
-        attempts_before_repair=args.attempts_before_repair,
-        runs=args.runs,
+        attempts_before_action=args.attempts_before_action,
+        items_to_pimp=args.items_to_pimp,
+        max_talisman_runs=args.max_talisman_runs,
+        bead_of_fire=args.bead_of_fire,
 
         verbose=args.verbose,
         coordinate_debug=args.coordinate_debug

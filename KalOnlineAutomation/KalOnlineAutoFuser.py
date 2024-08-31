@@ -125,7 +125,7 @@ class GameWindowHandler:
 
     def perform_click_sequence(self):
         for position in self.click_positions:
-            self.kalonline_utils.click_at_position(*position)
+            self.kalonline_utils.click_at_position(position)
             time.sleep(0.5)
         time.sleep(3.5)
 

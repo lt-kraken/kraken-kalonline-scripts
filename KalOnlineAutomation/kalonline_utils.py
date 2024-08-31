@@ -69,6 +69,13 @@ class KalOnlineUtils:
         except Exception as e:
             logging.error(f"Failed to right-click at position ({x}, {y}): {e}")
 
+    def drag_item(self, start_pos, end_pos):
+        self.app.window(handle=self.window_handle).drag_mouse(
+            press_coords=start_pos,
+            release_coords=end_pos,
+            button="left"
+        )
+
     @staticmethod
     def show_debug_overlay(screenshot, relative_region):
         draw = ImageDraw.Draw(screenshot)
