@@ -8,10 +8,6 @@ import logging
 # Setup basic logging configuration
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# Initialization
-pygame.mixer.init()
-pygame.mixer.music.load('ding.mp3')
-
 # Disable welcome message from PyGame
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 
@@ -127,6 +123,8 @@ class KalOnlineUtils:
     @staticmethod
     def play_sound():
         try:
+            pygame.mixer.init()
+            pygame.mixer.music.load('ding.mp3')
             pygame.mixer.music.play()
             while pygame.mixer.music.get_busy():
                 continue

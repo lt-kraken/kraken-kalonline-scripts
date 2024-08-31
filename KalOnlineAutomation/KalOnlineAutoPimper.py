@@ -111,6 +111,11 @@ class GameAutomationHandler:
         self.kalonline_utils.drag_item(self.coordinates['repair_item'], self.coordinates['weapon_item'])
         self.kalonline_utils.click_at_position((446, 430))
 
+    def pimp_item(self):
+        logging.debug(f"Pimping item...")
+        self.kalonline_utils.drag_item(self.coordinates['talisman_item'], self.coordinates['weapon_item'])
+        self.kalonline_utils.click_at_position((446, 430))
+
     def check_color_presence(self, region):
         window_rect = self.kalonline_utils.get_window_rect()
 
@@ -179,16 +184,16 @@ class GameAutomationHandler:
             talisman_runs = 0
             items_pimped = 0
             for run in range(self.items_to_pimp):
+                items_pimped += 1
                 talisman_runs += self.handle_run(run, talisman_runs)
 
                 if talisman_runs >= self.max_talisman_runs:
                     logging.warning(
                         f"Maximum talisman attempts ({self.max_talisman_runs}) reached. Stopping further pimping.")
-                    items_pimped = run
                     break
 
             logging.info(
-                f"Pimping sequence completed. Items attempted: {items_pimped + 1}/{self.items_to_pimp}, Talisman runs used: "
+                f"Pimping sequence completed. Items attempted: {items_pimped}/{self.items_to_pimp}, Talisman runs used: "
                 f"{talisman_runs}/{self.max_talisman_runs}")
 
         except Exception as e:
@@ -210,7 +215,7 @@ class GameAutomationHandler:
             total_attempts_performed += 1
 
             attempts_till_action = self.handle_attempts_and_repair(attempts_till_action)
-            self.kalonline_utils.drag_item(self.coordinates['talisman_item'], self.coordinates['weapon_item'])
+            self.pimp_item()
             time.sleep(6)
 
             result = self.check_color_presence((360, 210, 705, 265))
