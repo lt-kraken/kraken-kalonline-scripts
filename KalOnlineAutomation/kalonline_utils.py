@@ -17,6 +17,7 @@ class KalOnlineUtils:
         self.window_handle = handle
         self.verbose = verbose
         self.app = None
+        self.title_bar_offset = 28
 
         if self.verbose:
             logging.getLogger().setLevel(logging.DEBUG)
@@ -37,7 +38,7 @@ class KalOnlineUtils:
     def to_relative(self, absolute_coords):
         """ Convert absolute screen coordinates to coordinates relative to the window. """
         window_rect = self.get_window_rect()
-        return (absolute_coords[0] - window_rect[0], absolute_coords[1] - window_rect[1])
+        return absolute_coords[0] - window_rect[0], absolute_coords[1] - window_rect[1] - self.title_bar_offset
 
     def click_at_position(self, coords):
         x, y = coords

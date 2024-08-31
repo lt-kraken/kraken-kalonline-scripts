@@ -80,7 +80,6 @@ class GameWindowHandler:
 
         # Settings
         self.game_resolution = (1024, 768)
-        self.title_bar_offset = 28
 
         self.click_positions = [(510, 443), (450, 420), (450, 420)]
         self.color_check_region = (427, 320, 589, 346)
@@ -148,7 +147,7 @@ class GameWindowHandler:
         # Calculate the region relative to the window's current position
         relative_region = {
             "left": window_rect[0] + region[0],
-            "top": window_rect[1] + region[1] + self.title_bar_offset,
+            "top": window_rect[1] + region[1] + self.kalonline_utils.title_bar_offset,
             "width": region[2] - region[0],
             "height": region[3] - region[1]
         }

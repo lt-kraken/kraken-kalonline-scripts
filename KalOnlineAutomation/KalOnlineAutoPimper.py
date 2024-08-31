@@ -33,11 +33,11 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Reduce the default timings to speed up script execution
-timings.Timings.after_clickinput_wait = 0.1   # Time to wait after a click input
-timings.Timings.after_menu_wait = 0.1         # Time to wait after opening/closing a menu
-timings.Timings.after_sendkeys_key_wait = 0.1 # Time between keystrokes when using send_keys
+timings.Timings.after_clickinput_wait = 0.001   # Time to wait after a click input
+timings.Timings.after_menu_wait = 0.001         # Time to wait after opening/closing a menu
+timings.Timings.after_sendkeys_key_wait = 0.001 # Time between keystrokes when using send_keys
 
-timings.Timings.drag_n_drop_move_mouse_wait = 0.001
+timings.Timings.drag_n_drop_move_mouse_wait = 0
 timings.Timings.before_drag_wait = 0
 timings.Timings.before_drop_wait = 0
 timings.Timings.after_drag_n_drop_wait = 0
@@ -76,7 +76,6 @@ class GameAutomationHandler:
 
         # Settings
         self.game_resolution = (1024, 768)
-        self.title_bar_offset = 28
 
         self.coordinates = {}
         self.last_position = None
@@ -102,14 +101,16 @@ class GameAutomationHandler:
             return False  # Stop listener
 
     def repair_item_times(self, times):
-        logging.debug(f"Repairing item {times} times...")
-        for _ in range(times):
-            self.repair_item()
+        if self.repair_enabled:
+            logging.debug(f"Repairing item {times} times...")
+            for _ in range(times):
+                self.repair_item()
 
     def repair_item(self):
-        logging.debug(f"Repairing item...")
-        self.kalonline_utils.drag_item(self.coordinates['repair_item'], self.coordinates['weapon_item'])
-        self.kalonline_utils.click_at_position((446, 430))
+        if self.repair_enabled:
+            logging.debug(f"Repairing item...")
+            self.kalonline_utils.drag_item(self.coordinates['repair_item'], self.coordinates['weapon_item'])
+            self.kalonline_utils.click_at_position((446, 430))
 
     def pimp_item(self):
         logging.debug(f"Pimping item...")
@@ -121,7 +122,7 @@ class GameAutomationHandler:
 
         relative_region = {
             "left": window_rect[0] + region[0],
-            "top": window_rect[1] + region[1] + self.title_bar_offset,
+            "top": window_rect[1] + region[1] + self.kalonline_utils.title_bar_offset,
             "width": region[2] - region[0],
             "height": region[3] - region[1]
         }
@@ -190,11 +191,15 @@ class GameAutomationHandler:
                 if talisman_runs >= self.max_talisman_runs:
                     logging.warning(
                         f"Maximum talisman attempts ({self.max_talisman_runs}) reached. Stopping further pimping.")
+                    logging.info("Ensuring that item is repaired before quiting..")
+                    self.repair_item_times(self.attempts_before_action * 5)
                     break
 
             logging.info(
                 f"Pimping sequence completed. Items attempted: {items_pimped}/{self.items_to_pimp}, Talisman runs used: "
                 f"{talisman_runs}/{self.max_talisman_runs}")
+
+            self.kalonline_utils.play_sound()
 
         except Exception as e:
             logging.error(f"Error during pimping sequence: {e}")
@@ -225,6 +230,9 @@ class GameAutomationHandler:
 
             if success:
                 self.perform_auto_sell()
+                if attempts_till_action > 0:
+                    logging.info("Pimping succeeded - Restoring weapon to full durability")
+                    self.repair_item_times(attempts_till_action * 5)
                 logging.info(f"Item {run + 1}/{self.items_to_pimp} successfully pimped after {total_attempts_performed} attempts.")
                 break
 
