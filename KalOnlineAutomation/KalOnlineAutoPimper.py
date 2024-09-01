@@ -230,7 +230,7 @@ class GameAutomationHandler:
 
             if success:
                 self.perform_auto_sell()
-                if attempts_till_action > 0:
+                if attempts_till_action > 0 and self.auto_sell_type == 0:
                     logging.info("Pimping succeeded - Restoring weapon to full durability")
                     self.repair_item_times(attempts_till_action * 5)
                 logging.info(f"Item {run + 1}/{self.items_to_pimp} successfully pimped after {total_attempts_performed} attempts.")
@@ -297,7 +297,7 @@ class GameAutomationHandler:
             )
 
     def ask_for_auto_sell_type(self):
-        if not self.auto_sell_type:
+        if self.auto_sell_type is None:
             self.auto_sell_type = self.kalonline_utils.ask_for_input(
                 prompt_message="Please enter the desired sell type (0 = off, 1 = when successful, 2 = when successful "
                                "or after failed attempts: ",
@@ -388,7 +388,10 @@ if __name__ == "__main__":
                                                                    "selling if --auto-sell-type 2 is passed.")
     parser.add_argument("--repair", action="store_true", help="Enable repair functionality.")
     parser.add_argument("--repair-only", action="store_true", help="Only perform repair actions.")
-    parser.add_argument("--auto_sell_type", type=int, choices=[0, 1, 2], help="Auto-sell type.")
+    parser.add_argument("--auto_sell_type", type=int, choices=[0, 1, 2], help="Sets the auto sell type. 0 = Don't "
+                                                                              "sell, 1 = Sell if successful fuse, "
+                                                                              "2 = Sell when successful or after "
+                                                                              "attempts-before-action is reached.")
     parser.add_argument("--kings", action="store_true", help="Check for 'Kings' upgrade and confirm before stopping.")
     parser.add_argument("--bead_of_fire", action="store_true", help="Indicates whether BoF detection should be used.")
 
