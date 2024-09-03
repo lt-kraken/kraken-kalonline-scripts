@@ -63,6 +63,10 @@ KalOnlineAutoFuser.py [-h] [--show_handles] [--handle HANDLE]
 - `--attempts`: Maximum number of attempts.
 - `--help` | `-h`: Display manual
 
+### Setup example:
+- Fuser: <https://www.youtube.com/watch?v=8x989zxgzds>
+- Fuser in prompt mode: <https://www.youtube.com/watch?v=xJpebvqtNwE>
+
 ## KalOnline Auto Pimper
 ```bash
 KalOnlineAutoPimper.py [-h] [--show_handles] [--handle HANDLE] [--runs RUNS]
@@ -79,6 +83,10 @@ KalOnlineAutoPimper.py [-h] [--show_handles] [--handle HANDLE] [--runs RUNS]
    ```
 ### Specific scenarios
 For more in depth scenario's, please consult the wiki.
+
+### Setup example:
+- Autosell: <https://youtu.be/-EAykN541Qw>
+- Autopimper: <https://youtu.be/UzxHoB0N7NE>
 
 ### Arguments
 - `--handle`: Window handle ID to use for the game window.
