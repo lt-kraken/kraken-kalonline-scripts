@@ -270,8 +270,9 @@ class GameAutomationHandler:
         print("Starting pimping sequence..")
         self.perform_drag_sequence()
 
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Game Automation Script for Pimping.")
+    parser = argparse.ArgumentParser(description="Game KalOnlineAutomation Script for Pimping.")
     parser.add_argument("--handle", type=int, required=True, help="Window handle ID to use for the game window.")
     parser.add_argument("--runs", type=int, default=1, help="Number of runs to perform.")
     parser.add_argument("--attempts-before-repair", type=int, default=5, help="Number of runs to perform.")

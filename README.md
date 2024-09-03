@@ -8,8 +8,9 @@ The development of these tools was driven by a curiosity to explore the capabili
 
 ## Project Structure
 
-- `/AutoFuser`: Contains the automation script for item fusion in KalOnline along with its specific `requirements.txt` and `README.md`.
-- `/AutoPimper`: Contains the automation script for item enhancement in KalOnline along with its specific `requirements.txt` and `README.md`.
+- `KalOnlineAutomation`: Contains all refactored scripts ready for actual use
+- `Research/AutoFuser`: Contains the automation script for item fusion in KalOnline along with its specific `requirements.txt` and `README.md`.
+- `Research/AutoPimper`: Contains the automation script for item enhancement in KalOnline along with its specific `requirements.txt` and `README.md`.
 - `LICENSE`: Details the GNU General Public License under which this software is distributed.
 - `README.md`: Provides an overview of the project and its background.
 

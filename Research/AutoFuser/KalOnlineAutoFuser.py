@@ -125,7 +125,7 @@ class GameWindowHandler:
 
     def detect_fuse(self, region):
         # Get the window's rectangle
-        window_rect = self.get_window_rect(self.window_handle)
+        window_rect = self.kalonline_utils.get_window_rect(self.window_handle)
         
         # Calculate the region relative to the window's current position
         relative_region = {
@@ -200,9 +200,6 @@ class GameWindowHandler:
                 print(Fore.RED + "The provided handle does not correspond to a valid window.")
         except ValueError:
             print(Fore.RED + "Invalid handle ID. Please enter a valid integer.")
-
-    def get_window_rect(self, hwnd):
-        return win32gui.GetWindowRect(hwnd)
 
     def ask_for_handle(self):
         if not self.window_handle:
